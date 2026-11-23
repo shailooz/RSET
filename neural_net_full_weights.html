@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Network — Full Weight Labels</title>
+<style>
+  body { margin: 0; padding: 24px; font-family: sans-serif; background: #fff; color: #1a1a1a; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #e8e6de; }
+    #tooltip { background: #2c2c2a; border-color: #5f5e5a; color: #e8e6de; }
+  }
+  #nn-wrap { position: relative; width: 100%; max-width: 860px; margin: 0 auto; }
+  #nn-svg { display: block; width: 100%; }
+  .edge { stroke-width: 1; fill: none; cursor: pointer; transition: stroke-width .15s, opacity .15s; }
+  .edge:hover { stroke-width: 2.5; opacity: 1 !important; }
+  .edge-l1 { stroke: #7F77DD; opacity: .35; }
+  .edge-l2 { stroke: #1D9E75; opacity: .30; }
+  .edge-l3 { stroke: #D85A30; opacity: .35; }
+  .edge-l1:hover { stroke: #534AB7; }
+  .edge-l2:hover { stroke: #0F6E56; }
+  .edge-l3:hover { stroke: #993C1D; }
+  #tooltip {
+    position: absolute; pointer-events: none; opacity: 0; transition: opacity .15s;
+    background: #fff; border: 1px solid #b4b2a9; border-radius: 6px;
+    padding: 4px 9px; font-size: 13px; color: #1a1a1a; white-space: nowrap;
+  }
+  .node-blue   { fill: #E6F1FB; stroke: #185FA5; }
+  .node-teal   { fill: #E1F5EE; stroke: #0F6E56; }
+  .node-purple { fill: #EEEDFE; stroke: #534AB7; }
+  .node-coral  { fill: #FAECE7; stroke: #993C1D; }
+  .node-blue   text { fill: #0C447C; }
+  .node-teal   text { fill: #085041; }
+  .node-purple text { fill: #3C3489; }
+  .node-coral  text { fill: #712B13; }
+  @media (prefers-color-scheme: dark) {
+    .node-blue   { fill: #0C447C; stroke: #85B7EB; }
+    .node-teal   { fill: #085041; stroke: #5DCAA5; }
+    .node-purple { fill: #3C3489; stroke: #AFA9EC; }
+    .node-coral  { fill: #712B13; stroke: #F0997B; }
+    .node-blue   text { fill: #B5D4F4; }
+    .node-teal   text { fill: #9FE1CB; }
+    .node-purple text { fill: #CECBF6; }
+    .node-coral  text { fill: #F5C4B3; }
+  }
+  .lbl-muted { font-size: 12px; fill: #888780; }
+  @media (prefers-color-scheme: dark) { .lbl-muted { fill: #888780; } }
+  .hint { font-size: 12px; fill: #b4b2a9; }
+</style>
+</head>
+<body>
+<div id="nn-wrap">
+  <div id="tooltip"></div>
+  <svg id="nn-svg" viewBox="0 0 680 460" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Layer labels -->
+    <text class="lbl-muted" x="90"  y="30" text-anchor="middle">Input</text>
+    <text class="lbl-muted" x="255" y="30" text-anchor="middle">Hidden 1</text>
+    <text class="lbl-muted" x="425" y="30" text-anchor="middle">Hidden 2</text>
+    <text class="lbl-muted" x="590" y="30" text-anchor="middle">Output</text>
+
+    <!-- Matrix labels -->
+    <text class="lbl-muted" x="172" y="18" text-anchor="middle" style="font-style:italic">W⁽¹⁾</text>
+    <text class="lbl-muted" x="340" y="18" text-anchor="middle" style="font-style:italic">W⁽²⁾</text>
+    <text class="lbl-muted" x="508" y="18" text-anchor="middle" style="font-style:italic">W⁽³⁾</text>
+
+    <!-- Layer 1 edges: Input → Hidden 1 -->
+    <line class="edge edge-l1" data-lbl="w¹₁₁" x1="113" y1="80"  x2="231" y2="70"/>
+    <line class="edge edge-l1" data-lbl="w¹₁₂" x1="113" y1="84"  x2="231" y2="157"/>
+    <line class="edge edge-l1" data-lbl="w¹₁₃" x1="113" y1="88"  x2="231" y2="246"/>
+    <line class="edge edge-l1" data-lbl="w¹₁₄" x1="113" y1="90"  x2="231" y2="336"/>
+    <line class="edge edge-l1" data-lbl="w¹₂₁" x1="113" y1="186" x2="231" y2="74"/>
+    <line class="edge edge-l1" data-lbl="w¹₂₂" x1="113" y1="190" x2="231" y2="160"/>
+    <line class="edge edge-l1" data-lbl="w¹₂₃" x1="113" y1="194" x2="231" y2="250"/>
+    <line class="edge edge-l1" data-lbl="w¹₂₄" x1="113" y1="198" x2="231" y2="340"/>
+    <line class="edge edge-l1" data-lbl="w¹₃₁" x1="113" y1="296" x2="231" y2="76"/>
+    <line class="edge edge-l1" data-lbl="w¹₃₂" x1="113" y1="298" x2="231" y2="164"/>
+    <line class="edge edge-l1" data-lbl="w¹₃₃" x1="113" y1="300" x2="231" y2="254"/>
+    <line class="edge edge-l1" data-lbl="w¹₃₄" x1="113" y1="304" x2="231" y2="344"/>
+
+    <!-- Layer 2 edges: Hidden 1 → Hidden 2 -->
+    <line class="edge edge-l2" data-lbl="w²₁₁" x1="279" y1="70"  x2="401" y2="70"/>
+    <line class="edge edge-l2" data-lbl="w²₁₂" x1="279" y1="74"  x2="401" y2="157"/>
+    <line class="edge edge-l2" data-lbl="w²₁₃" x1="279" y1="78"  x2="401" y2="246"/>
+    <line class="edge edge-l2" data-lbl="w²₁₄" x1="279" y1="80"  x2="401" y2="335"/>
+    <line class="edge edge-l2" data-lbl="w²₂₁" x1="279" y1="156" x2="401" y2="74"/>
+    <line class="edge edge-l2" data-lbl="w²₂₂" x1="279" y1="160" x2="401" y2="160"/>
+    <line class="edge edge-l2" data-lbl="w²₂₃" x1="279" y1="164" x2="401" y2="250"/>
+    <line class="edge edge-l2" data-lbl="w²₂₄" x1="279" y1="168" x2="401" y2="339"/>
+    <line class="edge edge-l2" data-lbl="w²₃₁" x1="279" y1="246" x2="401" y2="76"/>
+    <line class="edge edge-l2" data-lbl="w²₃₂" x1="279" y1="250" x2="401" y2="164"/>
+    <line class="edge edge-l2" data-lbl="w²₃₃" x1="279" y1="254" x2="401" y2="254"/>
+    <line class="edge edge-l2" data-lbl="w²₃₄" x1="279" y1="258" x2="401" y2="343"/>
+    <line class="edge edge-l2" data-lbl="w²₄₁" x1="279" y1="336" x2="401" y2="76"/>
+    <line class="edge edge-l2" data-lbl="w²₄₂" x1="279" y1="340" x2="401" y2="166"/>
+    <line class="edge edge-l2" data-lbl="w²₄₃" x1="279" y1="344" x2="401" y2="256"/>
+    <line class="edge edge-l2" data-lbl="w²₄₄" x1="279" y1="348" x2="401" y2="346"/>
+
+    <!-- Layer 3 edges: Hidden 2 → Output -->
+    <line class="edge edge-l3" data-lbl="w³₁₁" x1="449" y1="70"  x2="566" y2="165"/>
+    <line class="edge edge-l3" data-lbl="w³₁₂" x1="449" y1="74"  x2="566" y2="255"/>
+    <line class="edge edge-l3" data-lbl="w³₂₁" x1="449" y1="157" x2="566" y2="168"/>
+    <line class="edge edge-l3" data-lbl="w³₂₂" x1="449" y1="163" x2="566" y2="258"/>
+    <line class="edge edge-l3" data-lbl="w³₃₁" x1="449" y1="247" x2="566" y2="171"/>
+    <line class="edge edge-l3" data-lbl="w³₃₂" x1="449" y1="253" x2="566" y2="261"/>
+    <line class="edge edge-l3" data-lbl="w³₄₁" x1="449" y1="337" x2="566" y2="173"/>
+    <line class="edge edge-l3" data-lbl="w³₄₂" x1="449" y1="343" x2="566" y2="263"/>
+
+    <!-- Input nodes -->
+    <g class="node-blue">
+      <circle cx="90" cy="80"  r="22" stroke-width="0.5"/>
+      <text x="90" y="80"  text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500">x₁</text>
+    </g>
+    <g class="node-blue">
+      <circle cx="90" cy="190" r="22" stroke-width="0.5"/>
+      <text x="90" y="190" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500">x₂</text>
+    </g>
+    <g class="node-blue">
+      <circle cx="90" cy="300" r="22" stroke-width="0.5"/>
+      <text x="90" y="300" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500">x₃</text>
+    </g>
+
+    <!-- Hidden layer 1 nodes -->
+    <g class="node-teal">
+      <circle cx="255" cy="70"  r="22" stroke-width="0.5"/>
+      <text x="255" y="70"  text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z¹₁</text>
+    </g>
+    <g class="node-teal">
+      <circle cx="255" cy="160" r="22" stroke-width="0.5"/>
+      <text x="255" y="160" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z¹₂</text>
+    </g>
+    <g class="node-teal">
+      <circle cx="255" cy="250" r="22" stroke-width="0.5"/>
+      <text x="255" y="250" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z¹₃</text>
+    </g>
+    <g class="node-teal">
+      <circle cx="255" cy="340" r="22" stroke-width="0.5"/>
+      <text x="255" y="340" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z¹₄</text>
+    </g>
+
+    <!-- Hidden layer 2 nodes -->
+    <g class="node-purple">
+      <circle cx="425" cy="70"  r="22" stroke-width="0.5"/>
+      <text x="425" y="70"  text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z²₁</text>
+    </g>
+    <g class="node-purple">
+      <circle cx="425" cy="160" r="22" stroke-width="0.5"/>
+      <text x="425" y="160" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z²₂</text>
+    </g>
+    <g class="node-purple">
+      <circle cx="425" cy="250" r="22" stroke-width="0.5"/>
+      <text x="425" y="250" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z²₃</text>
+    </g>
+    <g class="node-purple">
+      <circle cx="425" cy="340" r="22" stroke-width="0.5"/>
+      <text x="425" y="340" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500">Z²₄</text>
+    </g>
+
+    <!-- Output nodes -->
+    <g class="node-coral">
+      <circle cx="590" cy="170" r="22" stroke-width="0.5"/>
+      <text x="590" y="170" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500">y₁</text>
+    </g>
+    <g class="node-coral">
+      <circle cx="590" cy="260" r="22" stroke-width="0.5"/>
+      <text x="590" y="260" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500">y₂</text>
+    </g>
+
+    <!-- Hint -->
+    <text class="hint" x="340" y="430" text-anchor="middle">Hover any edge to see its weight label</text>
+  </svg>
+</div>
+
+<script>
+  const tip = document.getElementById('tooltip');
+  const wrap = document.getElementById('nn-wrap');
+  document.querySelectorAll('.edge').forEach(e => {
+    e.addEventListener('mouseenter', ev => {
+      tip.textContent = ev.target.dataset.lbl;
+      tip.style.opacity = '1';
+    });
+    e.addEventListener('mousemove', ev => {
+      const r = wrap.getBoundingClientRect();
+      let x = ev.clientX - r.left + 10, y = ev.clientY - r.top - 28;
+      if (x + 80 > r.width) x -= 90;
+      tip.style.left = x + 'px';
+      tip.style.top  = y + 'px';
+    });
+    e.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+  });
+</script>
+</body>
+</html>
